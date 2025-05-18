@@ -1,0 +1,16 @@
+
+# IDE
+.idea/
+.vscode/
+
+# Build
+__pycache__/
+build/
+dist/
+纯论文/
+各论文图片
+classify.csv
+
+# Misc
+*.pyc
+*.log

@@ -1,0 +1,9 @@
+pandas
+numpy
+Pillow
+scikit-learn
+scikit-image
+scipy
+tqdm
+pymupdf
+aiofiles
