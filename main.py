@@ -1,29 +1,39 @@
 # %% 导入包
 import os
-
 import pandas as pd
-import logging
-
 from parse import parse_main
-
-logging.getLogger('pdfminer').setLevel(logging.ERROR)
-
 import glob
 
+import logging
 import warnings
+logging.getLogger('pdfminer').setLevel(logging.ERROR)
 warnings.filterwarnings("ignore")
 
-# pdfs = glob.glob('./纯论文/1323队C题.pdf')
+# pdfs = glob.glob('./纯论文/1017队C题.pdf')
 pdfs = glob.glob('./纯论文/*.pdf')
 out_dir = './各论文图片/'
 grayimg_dir = out_dir +'疑似灰图/'
 
 
 # %% parse图片
-if not os.path.exists(out_dir) or not os.listdir(out_dir):
-    parse_main(pdfs, out_dir, grayimg_dir)
+existing_teams = set()
+if os.path.exists(out_dir):
+    existing_teams = set(os.listdir(out_dir))
+    existing_teams.discard('疑似灰图')
+
+new_pdfs = []
+for pdf in pdfs:
+    team_name = os.path.basename(pdf).split('队')[0] + '队'
+    if team_name not in existing_teams:
+        new_pdfs.append(pdf)
+
+if new_pdfs:
+    print(new_pdfs)
+    exit()
+    parse_main(new_pdfs, out_dir, grayimg_dir)
+    print(f"已解析 {len(new_pdfs)} 个新的PDF文件。")
 else:
-    print(f"{out_dir}已存在，跳过解析")
+    print("没有新的PDF文件需要解析。")
 
 # %% 分类
 teams = os.listdir(out_dir)
@@ -37,13 +47,12 @@ for team in teams:
         path_list.append(img_path)
 
 from classify import make_features, classify_features, VALID_IMAGE_PATH_LIST
-gray_weight = 0.1
 features, featdict = make_features(VALID_IMAGE_PATH_LIST, {
     'gray_threshold': 0.9,
     'saturation_threshold': 0.1,
     'size': 256,
-    'gray_weight': gray_weight,
-    'saturation_weight': 1 - gray_weight,
+    'gray_weight': 0.1,
+    'saturation_weight': 0.9,
 })
 classified = classify_features(features, eps=0.03, metric='cosine', min_samples=2)
 
